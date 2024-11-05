@@ -1,36 +1,56 @@
 # Car Rental System
 
 ## Overview
-The Car Rental System is a Java-based application designed to automate the car rental process. This system manages car inventory, customer details, bookings, and payments efficiently. It provides users with the ability to rent different types of cars, such as Hatchbacks, Sedans, and SUVs, for various durations, ensuring a streamlined and user-friendly experience.
+The **Car Rental System** is a Java-based application designed to streamline the car rental process. This project manages **car inventory, customer details, bookings, and payments** efficiently, making it easier for users to rent cars for various durations.
 
-![Car Rental System](car-rental.png)  <!-- Replace with your actual image path -->
+![Car Rental System](car-rental.png) <!-- Add a relevant image path here if available -->
 
 ## Objectives
-- Automate the car rental process.
-- Manage inventory, customer details, bookings, and payments efficiently.
-- Streamline the rental experience using Object-Oriented Programming principles.
+- **Automate** the car rental process.
+- Manage **inventory, customer details, bookings, and payments**.
+- Provide an intuitive interface for renting cars, applying **Object-Oriented Programming** principles.
 
 ## Features
-- **Car Management:** Add, view, and manage different types of cars.
-- **Customer Management:** Register new customers and manage existing customer details.
-- **Rent and Return:** Allow customers to rent and return cars with real-time availability checking.
-- **Payment Handling:** Process rental payments and generate cost estimates based on rental duration.
-- **Graphical User Interface (GUI):** User-friendly interface built with Java Swing.
+- **Car Inventory Management**: Track and update the availability of cars (Hatchback, Sedan, SUV).
+- **Customer Registration**: Record customer details for rental history.
+- **Booking System**: Allow customers to book and return cars with rental duration.
+- **Payment Integration**: Calculate rental costs and handle payments (to be improved in future).
 
 ## Technologies Used
-- Java
-- Java Swing (for GUI)
-- MySQL (for database management in future enhancements)
+- **Java** (Core functionality and GUI using Swing)
+- **MySQL** (or any database integration for data persistence – planned for future enhancements)
 
-## Challenges Faced
-Exception Handling: Implementing robust exception handling to manage errors gracefully.
-Data Persistence: Ensuring data persistence for car and customer records efficiently.
+## Challenges and Solutions
+Exception Handling: Ensured error messages for invalid inputs.
+Data Persistence: Added basic in-memory storage and plan to integrate a database.
 
 ## Future Enhancements
-Integrate a database for persistent data storage.
-Improve the GUI for better user experience.
-Develop a client-based system for enhanced customer interaction.
-Implement a login system for admin and clients to manage rentals and payments.
+Database Integration for permanent data storage.
+Login System for admins and clients.
+Improved GUI Design for a better user experience.
 
-## Conclusion
-The Car Rental System demonstrates an effective approach to managing the car rental process while adhering to OOP principles. Future enhancements aim to further improve functionality and user engagement.
+## Getting Started
+
+### Prerequisites
+- **Java JDK** installed (version 8 or higher).
+- **MySQL** installed if planning to extend the project with database support.
+- **Git** installed to clone the repository.
+  
+- ### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/username/car-rental-system.git
+
+2. Navigate to the project directory:
+```bash
+   cd car-rental-system
+
+3. Compile the Java files:
+```bash
+   javac -d bin src/*.java
+4. Run the application:
+```bash
+java -cp bin CarRentalSystemGUI
+
+
+
