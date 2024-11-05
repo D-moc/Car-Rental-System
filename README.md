@@ -48,9 +48,14 @@ Improved GUI Design for a better user experience.
 3. Compile the Java files:
 ```bash
    javac -d bin src/*.java
+
 4. Run the application:
 ```bash
-java -cp bin CarRentalSystemGUI
+  java -cp bin CarRentalSystemGUI
 
+## Usage
+1. Launch the application using the command above.
+2. Choose options to Rent a Car, Return a Car, or Process Payment.
+3. Input the necessary details as prompted to complete transactions.
 
 
