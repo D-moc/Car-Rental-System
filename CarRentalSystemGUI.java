@@ -3,150 +3,126 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class CarRentalSystemGUI {
+public class CarRentalSystemGUI extends JFrame {
     private CarRentalSystem rentalSystem;
-    private JFrame frame;
+    private JTextField nameField, regNumberField, daysField;
+    private JComboBox<String> carTypeComboBox;
+    private JTextArea messageBox;
 
     public CarRentalSystemGUI() {
         rentalSystem = new CarRentalSystem();
-        initializeCars(); // Initialize cars on GUI start
-        createAndShowGUI();
-    }
-
-    private void initializeCars() {
         rentalSystem.addCar(new Hatchback("H123", "Toyota", "Yaris", 300.0));
         rentalSystem.addCar(new Sedan("S456", "Honda", "Civic", 500.0));
         rentalSystem.addCar(new SUV("U789", "Ford", "Explorer", 700.0));
-    }
 
-    private void createAndShowGUI() {
-        frame = new JFrame("Car Rental System");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 500);
-        frame.setLayout(new BorderLayout());
+        setTitle("Car Rental System");
+        setSize(400, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        
+        JLabel welcomeLabel = new JLabel("Welcome to Car Rental System", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 25));
+        add(welcomeLabel, BorderLayout.NORTH);
 
-        JLabel welcomeLabel = new JLabel("Welcome to Car Rental System");
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 30));
-        welcomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(5, 2));
 
-        mainPanel.add(Box.createVerticalGlue());
-        mainPanel.add(welcomeLabel);
-        mainPanel.add(Box.createVerticalStrut(20));
+        inputPanel.add(new JLabel("Name:"));
+        nameField = new JTextField();
+        inputPanel.add(nameField);
 
+        inputPanel.add(new JLabel("Car Registration Number:"));
+        regNumberField = new JTextField();
+        inputPanel.add(regNumberField);
+
+        inputPanel.add(new JLabel("Rental Days:"));
+        daysField = new JTextField();
+        inputPanel.add(daysField);
+
+        inputPanel.add(new JLabel("Car Type:"));
+        carTypeComboBox = new JComboBox<>(new String[]{"Hatchback", "Sedan", "SUV"});
+        inputPanel.add(carTypeComboBox);
+
+        
+        messageBox = new JTextArea();
+        messageBox.setEditable(false);
+        messageBox.setPreferredSize(new Dimension(350, 80)); 
+        messageBox.setLineWrap(true);
+        messageBox.setWrapStyleWord(true);
+        messageBox.setBorder(BorderFactory.createTitledBorder("Message")); 
+
+
+        messageBox.setFont(new Font("Arial", Font.BOLD, 16));
+        inputPanel.add(messageBox); 
+
+        add(inputPanel, BorderLayout.CENTER);
+
+        // Create a panel for buttons
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-
         JButton rentButton = new JButton("Rent Car");
-        rentButton.setFont(new Font("Arial", Font.BOLD, 25));
-        rentButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleRent();
-            }
-        });
+        rentButton.addActionListener(new RentCarAction());
         buttonPanel.add(rentButton);
 
         JButton returnButton = new JButton("Return Car");
-        returnButton.setFont(new Font("Arial", Font.BOLD, 25));
-        returnButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleReturn();
-            }
-        });
+        returnButton.addActionListener(new ReturnCarAction());
         buttonPanel.add(returnButton);
 
-        JButton paymentButton = new JButton("Payment");
-        paymentButton.setFont(new Font("Arial", Font.BOLD, 25));
-        paymentButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handlePayment();
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private class RentCarAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String customerName = nameField.getText();
+            String carRegNumber = regNumberField.getText();
+            int days = Integer.parseInt(daysField.getText());
+            String carType = (String) carTypeComboBox.getSelectedItem();
+
+            try {
+                rentalSystem.displayCarsByType(carType);
+                Car selectedCar = rentalSystem.getCars().stream()
+                        .filter(car -> car.getCarRegNumber().equalsIgnoreCase(carRegNumber))
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("Car not found."));
+
+                Customer customer = new Customer(String.valueOf(rentalSystem.getCustomers().size() + 1), customerName);
+                rentalSystem.addCustomer(customer);
+                rentalSystem.rentCar(selectedCar, customer, days);
+
+                // Display success message in the message box
+                messageBox.setText("Car rented successfully: " + selectedCar.getCarRegNumber());
+            } catch (Exception ex) {
+                // Display error message in the message box
+                messageBox.setText("Error: " + ex.getMessage());
             }
-        });
-        buttonPanel.add(paymentButton);
-
-        mainPanel.add(buttonPanel);
-        mainPanel.add(Box.createVerticalGlue());
-
-        frame.add(mainPanel, BorderLayout.CENTER);
-        frame.setVisible(true);
-        frame.setLocationRelativeTo(null);
-    }
-
-    private void handleRent() {
-        String customerName = JOptionPane.showInputDialog(null, "Enter your name:", "Rent Car", JOptionPane.QUESTION_MESSAGE);
-        if (customerName == null) return;
-
-        String[] options = {"Hatchback", "Sedan", "SUV"};
-        String carType = (String) JOptionPane.showInputDialog(null, "Select car type to rent:", "Car Type",
-                JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-        if (carType == null) return;
-
-        String carRegNumber = JOptionPane.showInputDialog(null, "Enter the car registration number:", "Rent Car", JOptionPane.QUESTION_MESSAGE);
-        if (carRegNumber == null) return;
-
-        String rentalDaysStr = JOptionPane.showInputDialog(null, "Enter the number of rental days:", "Rent Car", JOptionPane.QUESTION_MESSAGE);
-        if (rentalDaysStr == null) return;
-
-        int rentalDays = Integer.parseInt(rentalDaysStr);
-
-        // Find the car and calculate cost
-        Car selectedCar = rentalSystem.getCars().stream()
-                .filter(car -> car.getCarRegNumber().equals(carRegNumber) && car.isAvailable())
-                .findFirst()
-                .orElse(null);
-
-        if (selectedCar == null) {
-            JOptionPane.showMessageDialog(null, "Car not available.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        double totalCost = selectedCar.getRentalRate() * rentalDays;
-        JOptionPane.showMessageDialog(null, "Total rental cost: ₹" + totalCost, "Rent Car", JOptionPane.INFORMATION_MESSAGE);
-
-        Customer customer = new Customer("CUS" + (rentalSystem.getCustomers().size() + 1), customerName);
-        rentalSystem.addCustomer(customer);
-        
-        rentalSystem.rentCar(selectedCar, customer, rentalDays);
-    }
-
-    private void handleReturn() {
-        String carRegNumber = JOptionPane.showInputDialog(null, "Enter the car registration number to return:", "Return Car", JOptionPane.QUESTION_MESSAGE);
-        if (carRegNumber == null) return;
-
-        try {
-            Car carToReturn = rentalSystem.getCars().stream()
-                    .filter(car -> car.getCarRegNumber().equals(carRegNumber) && !car.isAvailable())
-                    .findFirst()
-                    .orElseThrow(() -> new Exception("Car is not rented or invalid registration number."));
-            
-            double rentalCost = carToReturn.getRentalRate() * carToReturn.getRentedDays();
-            rentalSystem.returnCar(carToReturn);
-
-            JOptionPane.showMessageDialog(null, "Car returned successfully! Amount due: ₹" + rentalCost, "Return Car", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void handlePayment() {
-        String amountStr = JOptionPane.showInputDialog(null, "Enter payment amount:", "Payment", JOptionPane.QUESTION_MESSAGE);
-        if (amountStr == null) return;
+    private class ReturnCarAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String carRegNumber = regNumberField.getText();
 
-        try {
-            double amount = Double.parseDouble(amountStr);
-            JOptionPane.showMessageDialog(null, "Payment of ₹" + amount + " confirmed! Thank you for using our service.", "Payment Successful", JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Invalid amount. Please enter a numeric value.", "Error", JOptionPane.ERROR_MESSAGE);
+            try {
+                Car car = rentalSystem.getCars().stream()
+                        .filter(c -> c.getCarRegNumber().equalsIgnoreCase(carRegNumber))
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("Car not found."));
+                rentalSystem.returnCar(car);
+                // Display success message in the message box
+                messageBox.setText("Car returned successfully: " + car.getCarRegNumber());
+            } catch (Exception ex) {
+                // Display error message in the message box
+                messageBox.setText("Error: " + ex.getMessage());
+            }
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new CarRentalSystemGUI());
+        SwingUtilities.invokeLater(() -> {
+            CarRentalSystemGUI gui = new CarRentalSystemGUI();
+            gui.setVisible(true);
+        });
     }
 }
