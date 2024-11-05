@@ -21,7 +21,7 @@ abstract class Car implements Rentable {
     private String model;
     protected double basePricePerDay;
     private boolean isAvailable;
-    private int rentedDays; // Added rentedDays field
+    private int rentedDays; 
 
     public Car(String carRegNumber, String brand, String model, double basePricePerDay) {
         this.carRegNumber = carRegNumber;
@@ -151,26 +151,35 @@ class Rental {
 
 // Payment class to handle payment processing
 class Payment {
-    private double amount;
-    private boolean isPaid;
+    private double totalAmount;
+    private double paidAmount;
 
-    public Payment(double amount) {
-        this.amount = amount;
-        this.isPaid = false;
+    public Payment(double totalAmount) {
+        this.totalAmount = totalAmount;
+        this.paidAmount = 0.0;
     }
 
-    public double getAmount() {
-        return amount;
+    public double getRemainingAmount() {
+        return totalAmount - paidAmount;
     }
 
-    public boolean isPaid() {
-        return isPaid;
+    public void makePartialPayment(double amount) {
+        if (amount <= getRemainingAmount()) {
+            paidAmount += amount;
+            System.out.println("Partial payment of INR " + amount + " made successfully.");
+        } else {
+            System.out.println("Amount exceeds remaining balance. Partial payment failed.");
+        }
     }
 
-    public void makePayment() {
-        System.out.println("Processing payment of INR " + amount + "...");
-        this.isPaid = true;  // Simulate successful payment
-        System.out.println("Payment successful. Amount paid: INR " + amount);
+    public void makeFinalPayment() {
+        double remainingAmount = getRemainingAmount();
+        if (remainingAmount > 0) {
+            paidAmount += remainingAmount;
+            System.out.println("Final payment of INR " + remainingAmount + " made successfully.");
+        } else {
+            System.out.println("No remaining balance.");
+        }
     }
 }
 
@@ -205,19 +214,21 @@ class CarRentalSystem {
     public void rentCar(Car car, Customer customer, int days) throws Exception {
         if (car.isAvailable()) {
             double totalPrice = car.calculatePrice(days);
-            System.out.println("Total price to pay for " + days + " days: INR " + totalPrice);
+            System.out.println("Total rental price for " + days + " days: INR " + totalPrice);
             
             Payment payment = new Payment(totalPrice);
-            payment.makePayment();
+            double deposit = totalPrice * 0.3; // e.g., 30% deposit
+            System.out.println("Initial deposit required: INR " + deposit);
+            payment.makePartialPayment(deposit);
             
-            if (payment.isPaid()) {
+            if (payment.getRemainingAmount() < totalPrice) {
                 car.rent();
-                car.setRentedDays(days); // Store the rental days in the car
+                car.setRentedDays(days);
                 rentals.add(new Rental(car, customer, days));
                 car.saveToFile(customer.getName(), days);
-                System.out.println("Car rented successfully. Payment completed.");
+                System.out.println("Car rented successfully with partial payment.");
             } else {
-                System.out.println("Payment failed. Car rental unsuccessful.");
+                System.out.println("Initial deposit was not sufficient. Car rental unsuccessful.");
             }
         } else {
             throw new Exception("Car is not available for rent.");
@@ -226,8 +237,15 @@ class CarRentalSystem {
 
     public void returnCar(Car car) throws Exception {
         if (!car.isAvailable()) {
+            System.out.println("Returning car. Calculating final payment...");
+            
+            double totalAmount = car.calculatePrice(car.getRentedDays());
+            Payment payment = new Payment(totalAmount);
+            payment.makeFinalPayment();
+            
             car.returnItem();
-            System.out.println("Car returned successfully. Total amount paid was INR " + car.calculatePrice(car.getRentedDays()) + " for " + car.getRentedDays() + " days.");
+            System.out.println("Car returned successfully. Total payment completed for " + car.getRentedDays() + " days.");
+            
             Rental rentalToRemove = null;
             for (Rental rental : rentals) {
                 if (rental.getCar() == car) {
@@ -308,48 +326,45 @@ class CarRentalSystem {
         System.out.println("3. SUV");
         System.out.print("Enter your choice: ");
         int carTypeChoice = scanner.nextInt();
+
         scanner.nextLine();
 
         String carType = switch (carTypeChoice) {
             case 1 -> "Hatchback";
             case 2 -> "Sedan";
             case 3 -> "SUV";
-            default -> throw new IllegalArgumentException("Invalid car type choice.");
+            default -> throw new IllegalArgumentException("Invalid car type.");
         };
 
         System.out.println("Available " + carType + " cars:");
         displayCarsByType(carType);
 
-        System.out.print("Enter car registration number to rent: ");
+        System.out.print("Enter car registration number: ");
         String carRegNumber = scanner.nextLine();
 
-        Car selectedCar = cars.stream().filter(car -> car.getCarRegNumber().equalsIgnoreCase(carRegNumber)).findFirst().orElse(null);
-
-        if (selectedCar == null || !selectedCar.isAvailable()) {
-            System.out.println("Car is not available.");
-            return;
-        }
+        Car selectedCar = cars.stream()
+                .filter(car -> car.getCarRegNumber().equalsIgnoreCase(carRegNumber))
+                .findFirst()
+                .orElseThrow(() -> new Exception("Car not found."));
 
         System.out.print("Enter rental days: ");
         int days = scanner.nextInt();
 
-        Customer customer = new Customer("C" + (customers.size() + 1), customerName);
-        addCustomer(customer);
+        Customer customer = new Customer(String.valueOf(customers.size() + 1), customerName);
+        customers.add(customer);
 
         rentCar(selectedCar, customer, days);
     }
 
     private void handleReturn(Scanner scanner) throws Exception {
-        System.out.print("Enter car registration number to return: ");
+        System.out.print("Enter car registration number: ");
         String carRegNumber = scanner.nextLine();
 
-        Car carToReturn = cars.stream().filter(car -> car.getCarRegNumber().equalsIgnoreCase(carRegNumber)).findFirst().orElse(null);
+        Car car = cars.stream()
+                .filter(c -> c.getCarRegNumber().equalsIgnoreCase(carRegNumber))
+                .findFirst()
+                .orElseThrow(() -> new Exception("Car not found."));
 
-        if (carToReturn == null) {
-            System.out.println("Invalid car registration number.");
-            return;
-        }
-
-        returnCar(carToReturn);
+        returnCar(car);
     }
 }
