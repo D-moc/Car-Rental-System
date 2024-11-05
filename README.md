@@ -3,6 +3,8 @@
 ## Overview
 The Car Rental System is a Java-based application designed to automate the car rental process. This system manages car inventory, customer details, bookings, and payments efficiently. It provides users with the ability to rent different types of cars, such as Hatchbacks, Sedans, and SUVs, for various durations, ensuring a streamlined and user-friendly experience.
 
+![Car Rental System](car-rental.png)  <!-- Replace with your actual image path -->
+
 ## Objectives
 - Automate the car rental process.
 - Manage inventory, customer details, bookings, and payments efficiently.
