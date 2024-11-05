@@ -22,15 +22,15 @@ The Car Rental System is a Java-based application designed to automate the car r
 - Java Swing (for GUI)
 - MySQL (for database management in future enhancements)
 
+## Challenges Faced
+Exception Handling: Implementing robust exception handling to manage errors gracefully.
+Data Persistence: Ensuring data persistence for car and customer records efficiently.
+
 ## Future Enhancements
 Integrate a database for persistent data storage.
 Improve the GUI for better user experience.
 Develop a client-based system for enhanced customer interaction.
 Implement a login system for admin and clients to manage rentals and payments.
-
-## Challenges Faced
-Exception Handling: Implementing robust exception handling to manage errors gracefully.
-Data Persistence: Ensuring data persistence for car and customer records efficiently.
 
 ## Conclusion
 The Car Rental System demonstrates an effective approach to managing the car rental process while adhering to OOP principles. Future enhancements aim to further improve functionality and user engagement.
