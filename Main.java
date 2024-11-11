@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.border.LineBorder;
 
+
 class Car {
     private String carRegistrationNumber;
     private String brand;
@@ -21,9 +22,12 @@ class Car {
         this.model = model;
         this.type = type;
         this.basePricePerDay = basePricePerDay;
-        this.isAvailable = true;
+        this.isAvailable = true;    //by deafualt car is available
     }
 
+
+
+    //getters methods
     public String getCarRegistrationNumber() {
         return carRegistrationNumber;
     }
@@ -48,6 +52,10 @@ class Car {
         return isAvailable;
     }
 
+    public String toString() {
+        return model + " (" + carRegistrationNumber + ")";
+    }
+
     public void rent() {
         isAvailable = false;
     }
@@ -57,6 +65,10 @@ class Car {
     }
 }
 
+
+
+
+//handle customer detals
 class Customer {
     private String customerId;
     private String name;
@@ -75,6 +87,9 @@ class Customer {
     }
 }
 
+
+
+//handle rental details
 class Rental {
     private Car car;
     private Customer customer;
@@ -98,6 +113,8 @@ class Rental {
         return days;
     }
 }
+
+
 
 
 
@@ -202,9 +219,8 @@ class CarRentalSystemGUI {
         JLabel availableCarsLabel = new JLabel("Available Cars:");
         availableCarsLabel.setFont(new Font("Times New Roman", Font.BOLD, 40));
     
-
         // Dropdown for selecting a car
-        JComboBox<String> carComboBox = new JComboBox<>();
+        JComboBox<Car> carComboBox = new JComboBox<>();
         carComboBox.setFont(fieldFont);
     
         JLabel daysLabel = new JLabel("Enter rental days:");
@@ -228,14 +244,13 @@ class CarRentalSystemGUI {
         rentFrame.add(new JLabel());
         rentFrame.add(rentButton);
     
-       
         typeComboBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String selectedType = (String) typeComboBox.getSelectedItem();
                 carComboBox.removeAllItems();
                 for (Car car : cars) {
                     if (car.getType().equalsIgnoreCase(selectedType) && car.isAvailable()) {
-                        carComboBox.addItem(car.getCarRegistrationNumber());
+                        carComboBox.addItem(car);
                     }
                 }
             }
@@ -244,47 +259,39 @@ class CarRentalSystemGUI {
         rentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String name = nameField.getText();
-                String selectedCarRegNum = (String) carComboBox.getSelectedItem();
+                Car selectedCar = (Car) carComboBox.getSelectedItem();
                 int days = Integer.parseInt(daysField.getText());
     
-                Customer customer = new Customer("CUS" + (customers.size() + 1), name);
-                customers.add(customer);
-    
-                Car selectedCar = null;
-                for (Car car : cars) {
-                    if (car.getCarRegistrationNumber().equalsIgnoreCase(selectedCarRegNum) && car.isAvailable()) {
-                        selectedCar = car;
-                        break;
-                    }
-                }
-    
                 if (selectedCar != null) {
-                    double totalPrice = selectedCar.calculatePrice(days);
-                    int response = JOptionPane.showConfirmDialog(rentFrame, "Total price: ₹" + totalPrice + "\nDo you want to proceed?", 
-                    "Confirm Payment", 
-                    JOptionPane.YES_NO_OPTION);
+                    Customer customer = new Customer("CUS" + (customers.size() + 1), name);
+                    customers.add(customer);
     
-                    if (response == JOptionPane.YES_OPTION) {
-                        selectedCar.rent();
-                        rentals.add(new Rental(selectedCar, customer, days));
-                        JOptionPane.showMessageDialog(rentFrame, "Car rented successfully.");
-                    } else {
-                        JOptionPane.showMessageDialog(rentFrame, "Rental cancelled.");
+                    if (selectedCar.isAvailable()) {
+                        double totalPrice = selectedCar.calculatePrice(days);
+                        int response = JOptionPane.showConfirmDialog(rentFrame, "Total price: ₹" + totalPrice + "\nDo you want to proceed?", 
+                        "Confirm Payment", 
+                        JOptionPane.YES_NO_OPTION);
+    
+                        if (response == JOptionPane.YES_OPTION) {
+                            selectedCar.rent();
+                            rentals.add(new Rental(selectedCar, customer, days));
+                            JOptionPane.showMessageDialog(rentFrame, "Car rented successfully.");
+                        } else {
+                            JOptionPane.showMessageDialog(rentFrame, "Rental cancelled.");
+                        }
                     }
                 } else {
-                    JOptionPane.showMessageDialog(rentFrame, "No available cars selected.");
+                    JOptionPane.showMessageDialog(rentFrame, "No available car selected.");
                 }
             }
         });
     
-
         typeComboBox.setSelectedIndex(0);         // default car select
         typeComboBox.getActionListeners()[0].actionPerformed(new ActionEvent(typeComboBox, ActionEvent.ACTION_PERFORMED, ""));
-        
+    
         rentFrame.setVisible(true);
     }
     
-
 
 
 
@@ -293,13 +300,11 @@ class CarRentalSystemGUI {
     private void openReturnCarDialog() {
         JFrame returnFrame = new JFrame("Return a Car");
         returnFrame.setSize(400, 300);
-        returnFrame.setLayout(new GridLayout(3,0));
+        returnFrame.setLayout(new GridLayout(3, 0));
     
-        
         Font labelFont = new Font("Times New Roman", Font.BOLD, 50);  
         Font fieldFont = new Font("Times New Roman", Font.BOLD, 50);
     
-        
         JLabel regNumLabel = new JLabel("Enter car registration number:");
         regNumLabel.setFont(labelFont);
     
@@ -311,7 +316,6 @@ class CarRentalSystemGUI {
         JButton returnButton = new JButton("Return");
         returnButton.setFont(new Font("Times New Roman", Font.BOLD, 50));
     
-
         returnFrame.add(regNumLabel);
         returnFrame.add(regNumField);
         returnFrame.add(new JLabel());  
@@ -323,19 +327,32 @@ class CarRentalSystemGUI {
     
                 Car carToReturn = null;
                 for (Car car : cars) {
-                    if (car.getCarRegistrationNumber().equalsIgnoreCase(regNum) && !car.isAvailable()) {
+                    if (car.getCarRegistrationNumber().equalsIgnoreCase(regNum) && !car.isAvailable()) 
+                    {
                         carToReturn = car;
                         break;
                     }
                 }
     
-                if (carToReturn != null) 
-                {
+                if (carToReturn != null) {
                     carToReturn.returnCar();
                     removeRentalByCar(carToReturn);
     
-                    String feedback = JOptionPane.showInputDialog(returnFrame, "Enter feedback for the car:");
-                    JOptionPane.showMessageDialog(returnFrame, "Car returned successfully. Feedback: " + feedback);
+                    
+                    JTextArea feedbackArea = new JTextArea(5, 20);
+                    feedbackArea.setFont(new Font("Times New Roman", Font.BOLD, 30));
+                    feedbackArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    
+                    
+                    JScrollPane feedbackScrollPane = new JScrollPane(feedbackArea);
+                    int option = JOptionPane.showConfirmDialog(returnFrame, feedbackScrollPane, "Enter feedback for the car:", 
+                    JOptionPane.OK_CANCEL_OPTION, 
+                    JOptionPane.PLAIN_MESSAGE);
+    
+                    if (option == JOptionPane.OK_OPTION) {
+                        String feedback = feedbackArea.getText();
+                        JOptionPane.showMessageDialog(returnFrame, "Car returned successfully. Feedback: " + feedback);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(returnFrame, "Car not rented or invalid registration number.");
                 }
